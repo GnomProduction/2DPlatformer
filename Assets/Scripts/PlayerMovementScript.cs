@@ -3,17 +3,27 @@ using System.Collections;
 
 public class PlayerMovementScript : MonoBehaviour {
 	private float Speed;
+	[SerializeField]
 	private float JumpHeight;
 	private Rigidbody2D playerRigidbody;
-	private Transform[] GroundPoints;
+
+	public Transform GroundCheck;
+	private float GroundCheckRadius;
+	public LayerMask whatIsGround;
 	private bool IsGrounded;
+	private bool DoubleJumped;
 
 	void Start () 
 	{
 		Speed = 100.0f;
-		JumpHeight = 300.0f;
+		//JumpHeight = 200.0f;
 		playerRigidbody = gameObject.GetComponent<Rigidbody2D> ();
-		GroundPoints = transform.GetComponentsInChildren<Transform> ();
+		GroundCheckRadius = 0.1f;
+	}
+
+	void FixedUpdate()
+	{
+		IsGrounded = Physics2D.OverlapCircle (GroundCheck.position, GroundCheckRadius, whatIsGround);
 	}
 
 	void Update () 
@@ -24,24 +34,19 @@ public class PlayerMovementScript : MonoBehaviour {
 	{
 		playerRigidbody.velocity = new Vector2(Input.GetAxis("Horizontal") * Speed * Time.deltaTime, playerRigidbody.velocity.y);
 
-		if(Input.GetKeyDown(KeyCode.Space))
+		if (IsGrounded) 
 		{
-			IsGrounded = checkIfGrounded (GroundPoints);
-			if (IsGrounded) 
-			{
-				Debug.Log (IsGrounded);
-				Jump ();
-			}
+			DoubleJumped = false;
 		}
-	}
-	private bool checkIfGrounded(Transform[] groundPoints)
-	{
-		foreach (Transform t in groundPoints)
+		if(Input.GetKeyDown(KeyCode.Space) && IsGrounded)
 		{
-			Debug.Log (t);
-			return true;
+			Jump ();
 		}
-		return false;
+		if (Input.GetKeyDown (KeyCode.Space) && !IsGrounded && !DoubleJumped)
+		{
+			Jump ();
+			DoubleJumped = true;
+		}
 	}
 	private void Jump()
 	{
