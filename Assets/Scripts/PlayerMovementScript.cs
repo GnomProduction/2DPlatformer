@@ -13,12 +13,17 @@ public class PlayerMovementScript : MonoBehaviour {
 	private bool IsGrounded;
 	private bool DoubleJumped;
 
+	public Vector3 checkPointPosition{ get; set; }
+
+	private bool Died;
+
 	void Start () 
 	{
 		Speed = 100.0f;
 		//JumpHeight = 200.0f;
 		playerRigidbody = gameObject.GetComponent<Rigidbody2D> ();
 		GroundCheckRadius = 0.1f;
+		Died = false;
 	}
 
 	void FixedUpdate()
@@ -51,5 +56,28 @@ public class PlayerMovementScript : MonoBehaviour {
 	private void Jump()
 	{
 		playerRigidbody.AddForce(new Vector2(0, JumpHeight));
+	}
+	/*void OnCollisionEnter2D(Collision2D col)
+	{
+		
+	}*/
+	void OnTriggerEnter2D(Collider2D coll)
+	{
+		if (coll.gameObject.tag == "Checkpoint")
+		{
+			checkPointPosition = coll.transform.position;
+		}
+		if (coll.gameObject.tag == "EndTrigger") 
+		{
+			Died = true;
+			Spawn (checkPointPosition);
+			Debug.Log (Died);
+			Debug.Log (checkPointPosition);
+		}
+	}
+	private void Spawn(Vector3 position)
+	{
+		gameObject.transform.position = position;
+		Died = false;
 	}
 }
